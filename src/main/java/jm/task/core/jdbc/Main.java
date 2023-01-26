@@ -1,12 +1,22 @@
 package jm.task.core.jdbc;
 
+import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.service.UserServiceImpl;
+import jm.task.core.jdbc.util.Util;
+import org.hibernate.Session;
+
 
 public class Main {
     public static void main(String[] args) {
 
+
+
+
         UserServiceImpl userService =new UserServiceImpl();
+        userService.dropUsersTable();
         userService.createUsersTable();
+
+
 
         userService.saveUser("Alex", "1111", (byte) 1);
         userService.saveUser("Alex2", "222", (byte) 2);
@@ -16,6 +26,6 @@ public class Main {
         userService.getAllUsers();
         userService.cleanUsersTable();
         userService.dropUsersTable();
-
     }
 }
+
