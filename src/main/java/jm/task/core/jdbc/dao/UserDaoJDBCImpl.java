@@ -10,13 +10,15 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
 
+import static jm.task.core.jdbc.util.Util.getConnection;
+
 public class UserDaoJDBCImpl implements UserDao {
     public UserDaoJDBCImpl() {
 
     }
 
     public void createUsersTable() {
-        try (Statement statement = new Util().getConnection().createStatement()) {
+        try (Statement statement = getConnection().createStatement()) {
             statement.execute("CREATE TABLE users (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(45),lastname VARCHAR(45),age TINYINT)   ");
         } catch (SQLException e) {
 
@@ -24,7 +26,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void dropUsersTable() {
-        try (Statement statement = new Util().getConnection().createStatement()) {
+        try (Statement statement = getConnection().createStatement()) {
             statement.execute("DROP TABLE users ");
         } catch (SQLException e) {
 
@@ -33,7 +35,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
         String sql = "INSERT INTO users (name, lastname,age) Values (?,?,?)";
-        try (PreparedStatement statement = new Util().getConnection().prepareStatement(sql)) {
+        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
             statement.setString(1, name);
             statement.setString(2, lastName);
             statement.setByte(3, age);
@@ -46,7 +48,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         String sql = "DELETE  FROM users WHERE id=?";
-        try (PreparedStatement statement = new Util().getConnection().prepareStatement(sql)) {
+        try (PreparedStatement statement = getConnection().prepareStatement(sql)) {
             statement.setLong(1, id);
             statement.execute();
         } catch (SQLException e) {
@@ -57,7 +59,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> users = new LinkedList<>();
         String query = "SELECT * FROM users";
-        try (PreparedStatement statement = new Util().getConnection().prepareStatement(query)) {
+        try (PreparedStatement statement = getConnection().prepareStatement(query)) {
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -82,7 +84,7 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        try (Statement statement = new Util().getConnection().createStatement()) {
+        try (Statement statement = getConnection().createStatement()) {
             statement.execute("TRUNCATE TABLE users");
         } catch (SQLException e) {
 
