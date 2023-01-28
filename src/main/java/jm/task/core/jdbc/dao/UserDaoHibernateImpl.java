@@ -29,14 +29,12 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void createUsersTable() {
         try (Session session = getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+            session.beginTransaction();
             session.createSQLQuery("CREATE TABLE users (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(45),lastname VARCHAR(45),age TINYINT)")
                     .executeUpdate();
-            transaction.commit();
+            session.getTransaction().commit();
         } catch (PersistenceException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+
             System.out.println("Таблица существует");
         }
 
@@ -47,15 +45,13 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         try {
             Session session = getSessionFactory().openSession();
-            transaction = session.beginTransaction();
+            session.beginTransaction();
             session.createSQLQuery("DROP TABLE users").executeUpdate();
-            transaction.commit();
+            session.getTransaction().commit();
         } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+
             System.out.println("Таблица удалена");
-            ;
+
         }
 
 
@@ -119,13 +115,11 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void cleanUsersTable() {
         try (Session session = getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
+            session.beginTransaction();
             session.createQuery("delete  User").executeUpdate();
-            transaction.commit();
+            session.getTransaction().commit();
         } catch (PersistenceException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+
             System.out.println("Такого пользователя нет");
         }
     }
