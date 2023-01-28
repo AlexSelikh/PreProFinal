@@ -19,6 +19,8 @@ import static jm.task.core.jdbc.util.Util.getSessionFactory;
 
 
 public class UserDaoHibernateImpl implements UserDao {
+    private Transaction transaction;
+
     public UserDaoHibernateImpl() {
 
     }
@@ -26,8 +28,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        Transaction transaction = null;
-        try(Session session = getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
             session.createSQLQuery("CREATE TABLE users (id BIGINT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(45),lastname VARCHAR(45),age TINYINT)")
                     .executeUpdate();
@@ -44,20 +45,18 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void dropUsersTable() {
-        Transaction transaction = null;
         try {
             Session session = getSessionFactory().openSession();
             transaction = session.beginTransaction();
-            Query query = session.createSQLQuery("DROP TABLE users");
-            query.executeUpdate();
+            session.createSQLQuery("DROP TABLE users").executeUpdate();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }
-            System.out.println("Таблица удалена");;
+            System.out.println("Таблица удалена");
+            ;
         }
-
 
 
     }
@@ -66,12 +65,16 @@ public class UserDaoHibernateImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         User user = new User(name, lastName, age);
         try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
             session.save(user);
-            session.getTransaction().commit();
+            transaction.commit();
             System.out.println("User с именем – " + name + " добавлен в базу данных");
         } catch (PersistenceException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             System.out.println("неправильно добавили пользователя");
+
         }
 
     }
@@ -80,11 +83,14 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void removeUserById(long id) {
         try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
             User user = session.get(User.class, id);
             session.delete(user);
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (PersistenceException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             System.out.println("Такого пользователя нет");
         }
     }
@@ -93,15 +99,19 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> users = null;
         try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
             users = session.createQuery("FROM User").getResultList();
             for (User el : users) {
                 System.out.println(el);
             }
-            session.getTransaction().commit();
+            transaction.commit();
 
         } catch (PersistenceException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             System.out.println("неправильно добавили пользователя");
+
         }
         return users;
     }
@@ -109,10 +119,13 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public void cleanUsersTable() {
         try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
             session.createQuery("delete  User").executeUpdate();
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (PersistenceException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             System.out.println("Такого пользователя нет");
         }
     }
